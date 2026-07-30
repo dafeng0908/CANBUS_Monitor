@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+
+.venv/
+venv/
+
+reports/latest/*
+!reports/latest/.gitkeep
+
+build/
+Debug/
+Release/
+
+.coverage
+htmlcov/
+.pytest_cache/
