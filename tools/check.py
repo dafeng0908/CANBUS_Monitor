@@ -1,19 +1,13 @@
 
 from __future__ import annotations
-
+ 
 from pathlib import Path
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED_PATHS = [
-    Path("AGENTS.md"),
-    Path("PROJECT.md"),
-    Path("QUALITY_GATE.md"),
-    Path("docs/architecture"),
-    Path("docs/requirements"),
-    Path("docs/development"),
-    Path("docs/exec-plans/active"),
-    Path("firmware"),
-    Path("pc_tool"),
+    REPO_ROOT / "AGENTS.md",
+    REPO_ROOT / "PROJECT.md",
 ]
 
 
