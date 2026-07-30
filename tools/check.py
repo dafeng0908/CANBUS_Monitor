@@ -7,9 +7,16 @@ from tools.architecture_check import run as run_architecture_check
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED_PATHS = [
+    Path("AGENTS.md"),
+    Path("PROJECT.md"),
+    Path("QUALITY_GATE.md"),
+    Path("tools.py"),
     Path("docs/architecture"),
     Path("docs/requirements"),
     Path("docs/development/coding_style.md"),
+    Path("docs/exec-plans/active"),
+    Path("firmware"),
+    Path("pc_tool"),
 ]
 
 def run() -> int:
