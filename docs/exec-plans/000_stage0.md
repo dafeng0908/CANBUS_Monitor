@@ -1,19 +1,9 @@
-Stage 1
+## Stage 0
 
-Objective
-
-Build CAN Driver
-
-Done Definition
-
-□ compile
-
-□ cppcheck
-
-□ unit test
-
-□ report
-
-Files
-
-firmware/Drivers/CAN
+| Gate | Command | Required | Result | Evidence |
+|---|---|---:|---|---|
+| Environment | `python tools.py doctor` | Yes | Pending | |
+| Repository check | `python tools.py check` | Yes | Pending | |
+| CLI validity | `python tools.py --help` | Yes | Pending | |
+| False PASS prevention | automated test | Yes | Pending | |
+| CI parity | GitHub Actions | Yes | Pending | |
