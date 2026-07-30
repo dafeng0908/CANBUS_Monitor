@@ -1,87 +1,108 @@
 from __future__ import annotations
 
-import argparse
-import sys
-from collections.abc import Callable
-
-from tools.architecture_check import run as run_architecture_check
-from tools.build import run as run_build
-from tools.check import run as run_check
-from tools.doctor import run as run_doctor
+import subprocess
+from datetime import datetime
+from pathlib import Path
+from typing import Sequence
 
 
-Command = Callable[[], int]
+# Repository 根目錄。
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+# 報告目錄。
+REPORTS_ROOT = REPO_ROOT / "reports"
+LATEST_REPORT_DIR = REPORTS_ROOT / "latest"
+HISTORY_REPORT_DIR = REPORTS_ROOT / "history"
 
 
-def create_parser() -> argparse.ArgumentParser:
+def ensure_report_directories() -> None:
     """
-    建立 CANBUS Monitor Harness 的命令列解析器。
+    建立 Harness 所需的報告目錄。
     """
-    parser = argparse.ArgumentParser(
-        description="CANBUS Monitor development harness",
-    )
-
-    subparsers = parser.add_subparsers(
-        dest="command",
-        required=True,
-    )
-
-    subparsers.add_parser(
-        "doctor",
-        help="Check local development tools and environment",
-    )
-
-    subparsers.add_parser(
-        "check",
-        help="Check repository contract, active plan and architecture rules",
-    )
-
-    subparsers.add_parser(
-        "architecture",
-        help="Run firmware architecture checks",
-    )
-
-    subparsers.add_parser(
-        "build",
-        help="Build firmware and PC tool",
-    )
-
-    return parser
+    LATEST_REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    HISTORY_REPORT_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def main() -> int:
+def current_timestamp() -> str:
     """
-    Harness CLI 主入口。
+    取得含時區資訊的 ISO 8601 時間。
+    """
+    return datetime.now().astimezone().isoformat(timespec="seconds")
+
+
+def get_git_commit() -> str:
+    """
+    取得目前 Repository 的 Git commit SHA。
+
+    無法取得時回傳 UNKNOWN，不拋出例外。
+    """
+    result = run_command(
+        ["git", "rev-parse", "HEAD"],
+        cwd=REPO_ROOT,
+    )
+
+    if result.returncode != 0:
+        return "UNKNOWN"
+
+    commit = result.stdout.strip()
+    return commit if commit else "UNKNOWN"
+
+
+def run_command(
+    command: Sequence[str],
+    *,
+    cwd: Path | None = None,
+    timeout_seconds: int = 60,
+) -> subprocess.CompletedProcess[str]:
+    """
+    執行外部命令。
+
+    Args:
+        command: 命令與參數。
+        cwd: 工作目錄。
+        timeout_seconds: timeout 秒數。
 
     Returns:
-        0：命令成功。
-        非 0：命令失敗、環境缺失或功能尚未實作。
+        subprocess.CompletedProcess。
+
+    注意：
+        這個函式不使用 check=True，呼叫者必須自行處理 exit code。
     """
-    parser = create_parser()
-    args = parser.parse_args()
-
-    commands: dict[str, Command] = {
-        "doctor": run_doctor,
-        "check": run_check,
-        "architecture": run_architecture_check,
-        "build": run_build,
-    }
-
-    command = commands.get(args.command)
-
-    if command is None:
-        parser.print_help()
-        return 2
-
     try:
-        return command()
-    except KeyboardInterrupt:
-        print("\n[FAIL] Command interrupted by user.")
-        return 130
-    except Exception as exc:
-        print(f"[FAIL] Unexpected harness error: {exc}")
-        return 1
+        return subprocess.run(
+            list(command),
+            cwd=cwd or REPO_ROOT,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=timeout_seconds,
+            check=False,
+        )
+    except FileNotFoundError as exc:
+        return subprocess.CompletedProcess(
+            args=list(command),
+            returncode=127,
+            stdout="",
+            stderr=str(exc),
+        )
+    except subprocess.TimeoutExpired as exc:
+        stdout = exc.stdout if isinstance(exc.stdout, str) else ""
+        stderr = exc.stderr if isinstance(exc.stderr, str) else ""
+
+        return subprocess.CompletedProcess(
+            args=list(command),
+            returncode=124,
+            stdout=stdout,
+            stderr=f"{stderr}\nCommand timeout after {timeout_seconds} seconds.",
+        )
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+def relative_to_repo(path: Path) -> str:
+    """
+    將絕對路徑轉換成 Repository 相對路徑。
+    """
+    try:
+        return path.resolve().relative_to(REPO_ROOT.resolve()).as_posix()
+    except ValueError:
+        return path.as_posix()
