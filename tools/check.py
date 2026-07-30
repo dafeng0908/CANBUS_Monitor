@@ -1,4 +1,4 @@
-
+from tools.architecture_check import run as run_architecture_check
 from __future__ import annotations
  
 from pathlib import Path
