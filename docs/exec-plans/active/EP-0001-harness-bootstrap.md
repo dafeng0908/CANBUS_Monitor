@@ -15,8 +15,8 @@ Establish the minimum executable development harness.
 
 ## Acceptance Criteria
 
-- `python tools\tools.py doctor` executes
-- `python tools\tools.py check` executes
+- `python tools.py doctor` executes
+- `python tools.py check` executes
 - Missing external tools are reported
 - No command reports a false PASS
 - AGENTS.md links resolve
