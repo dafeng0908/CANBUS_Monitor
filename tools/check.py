@@ -6,8 +6,15 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED_PATHS = [
-    REPO_ROOT / "AGENTS.md",
-    REPO_ROOT / "PROJECT.md",
+    "docs/architecture",
+    "docs/requirements",
+    "docs/development/coding_style.md",
+]
+
+REQUIRED_COMMANDS = [
+    ["python", "tools.py", "doctor"],
+    ["python", "tools.py", "check"],
+    ["python", "tools.py", "build"],
 ]
 
 
