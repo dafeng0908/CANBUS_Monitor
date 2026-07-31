@@ -1,0 +1,23 @@
+# CANBUS_Monitor Harness configuration
+# 位置：CANBUS_Monitor/config/harness.toml
+# 相對路徑均以 repository 根目錄為基準。
+
+[firmware]
+project_dir = "firmware/NUCLEO-C542RC"
+workspace_dir = ".harness-workspace"
+project_name = "CANBUS_Monitor"
+build_configuration = "Debug"
+artifact = "firmware/NUCLEO-C542RC/Debug/CANBUS_Monitor.elf"
+timeout_seconds = 600
+clean_build = true
+
+[tools]
+# 請依實際安裝版本修改。
+# Windows TOML 建議使用正斜線。
+stm32cubeide = "C:/ST/STM32CubeIDE_1.19.0/STM32CubeIDE/stm32cubeide.exe"
+# 若已加入 PATH，也可改成：
+# stm32cubeide = "stm32cubeide"
+
+[reports]
+stdout_log = "reports/latest/build.stdout.log"
+stderr_log = "reports/latest/build.stderr.log"
